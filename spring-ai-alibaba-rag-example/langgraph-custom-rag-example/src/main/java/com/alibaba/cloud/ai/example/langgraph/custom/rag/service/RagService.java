@@ -32,9 +32,7 @@ import java.util.List;
 
 public interface RagService {
 
-	void importDocuments();
-
-	List<Document> search(String message);
+	String graphCall(String message);
 
 	Flux<ChatResponse> retrieve(String message);
 }

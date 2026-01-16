@@ -45,16 +45,6 @@ public class CloudRagController {
 		this.cloudRagService = cloudRagService;
 	}
 
-	@GetMapping("/knowledge/importDocument")
-	public void importDocument() {
-		cloudRagService.importDocuments();
-	}
-
-	@GetMapping("/knowledge/searchDocument")
-	public List<Document> searchDocument(@RequestParam(value = "message") String message) {
-		return cloudRagService.search(message);
-	}
-
 	@GetMapping("/bailian/knowledge/generate")
 	public Flux<String> generate(@RequestParam(value = "message",
 			defaultValue = "你好，请问你的知识库文档主要是关于什么内容的?") String message) {
