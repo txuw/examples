@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
- * @author : zhengyuchao
+ * @author : txuw
  * @date : 2026/1/16
  */
 public class KnowledgeRequest {

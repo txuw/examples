@@ -2,9 +2,10 @@
 
 ## 模块说明
 
-本模块演示了如何结合 **Spring AI Alibaba** 与 **LangGraph** 实现一个自定义的 RAG (检索增强生成) 流程。
+本模块使用 **Spring AI Alibaba** 参考 **LangGraph** 用例实现一个自定义的 RAG (检索增强生成) 流程。
+https://docs.langchain.com/oss/python/langgraph/agentic-rag
 
-通过 LangGraph 的状态机机制，本项目实现了一个具备 **自我校正 (Self-Correction)** 能力的 RAG 工作流：
+本项目实现了一个具备 **自我校正 (Self-Correction)** 能力的 RAG 工作流：
 1. **查询生成 (Generate Query)**：根据用户原始问题生成更适合检索的查询。
 2. **文档分级 (Grade Documents)**：检索相关文档并评估其与查询的相关性。
 3. **重写 (Rewrite)**：如果检索到的文档相关性不足，则自动重构查询并重新开始检索流程。

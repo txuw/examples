@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author : zhengyuchao
+ * @author : txuw
  * @date : 2026/1/16
  */
 public class GenerateQueryNode implements NodeAction {
