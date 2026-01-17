@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 
 import java.util.HashMap;
@@ -40,16 +42,18 @@ public class GenerateAnswerNode implements NodeAction {
                 上下文：{content}
                 """;
         String query = state.value("query", "");
-        String generateQueryContent = state.value("context", "");
+        String generateQueryContent = state.value("content", "");
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemPrompt);
-        Message message = systemPromptTemplate.createMessage(Map.of("context", generateQueryContent, "query", query));
+        Message message = systemPromptTemplate.createMessage(Map.of("content", generateQueryContent, "query", query));
 
         logger.info("node :"+NAME+" 发起请求:"+message.getText() );
 
         ChatClient.CallResponseSpec callResponseSpec = chatClient.prompt(message.getText())
                 .call();
-        String id = callResponseSpec.chatResponse().getMetadata().getId();
-        String content = callResponseSpec.content();
+        ChatResponse response = callResponseSpec.chatResponse();
+        Generation result = response.getResult();
+        String id = result.getMetadata().getOrDefault("requestId", "");
+        String content = result.getOutput().getText();
 
         logger.info("node :"+NAME+" id: "+id+" 返回值: "+content);
 

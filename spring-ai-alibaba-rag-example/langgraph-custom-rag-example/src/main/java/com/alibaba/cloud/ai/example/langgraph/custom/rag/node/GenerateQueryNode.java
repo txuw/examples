@@ -7,12 +7,12 @@ import com.alibaba.cloud.ai.graph.action.NodeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +27,13 @@ public class GenerateQueryNode implements NodeAction {
 
     private final ChatClient chatClient;
 
+    private final ToolCallback knowledgeToolCallback;
+
     public final static String NAME = "GenerateQueryNode";
 
     public GenerateQueryNode(ChatClient.Builder chatClientBuilder, KnowledgeTool knowledgeTool) {
 
-        ToolCallback knowledgeToolCallback = FunctionToolCallback.builder("get_alibaba_knowledge", knowledgeTool)
+        this.knowledgeToolCallback = FunctionToolCallback.builder("get_alibaba_knowledge", knowledgeTool)
                 .description("用于查询spring ai alibaba教程知识库")
                 .inputType(KnowledgeRequest.class)
                 .build();
@@ -44,14 +46,27 @@ public class GenerateQueryNode implements NodeAction {
     public Map<String, Object> apply(OverAllState state) throws Exception {
         String query = state.value("query", "");
 
-        logger.info("node :"+NAME+" 发起请求:"+query );
+        logger.info("node :" + NAME + " 发起请求:" + query);
 
+        // internalToolExecutionEnabled 设置 false 如果调用工具，则让AI只产出call参数
         ChatClient.CallResponseSpec callResponseSpec = chatClient.prompt(query)
+                .options(ToolCallingChatOptions.builder()
+                        .internalToolExecutionEnabled(false)
+                        .build())
                 .call();
-        String id = callResponseSpec.chatResponse().getMetadata().getId();
-        String content = callResponseSpec.content();
+        ChatResponse response = callResponseSpec.chatResponse();
+        Generation result = response.getResult();
+        String id = result.getMetadata().getOrDefault("requestId", "");
+        String content = result.getOutput().getText();
 
-        logger.info("node :"+NAME+" id: "+id+" 返回值: "+content);
+        // Q:为什么需要换上下文，这样的话不如直接调工具吧？
+        // A:因为如果是常规聊天，就不会去调用工具，直接输出内容了
+        if (result.getOutput().hasToolCalls()) {
+            AssistantMessage.ToolCall toolCall = result.getOutput().getToolCalls().get(0);
+            content = knowledgeToolCallback.call(toolCall.arguments());
+        }
+
+        logger.info("node :" + NAME + " id: " + id + " 返回值: " + content);
 
         HashMap<String, Object> resultMap = new HashMap<>();
         resultMap.put("content", content);

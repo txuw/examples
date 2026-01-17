@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
@@ -44,20 +46,22 @@ public class GradeDocumentsNode implements NodeAction {
         String systemPrompt = """
                         你是一个评分员，负责评估检索到的文档与用户问题的相关性。
                          这是检索到的文档：
-                         {query}
-                         这是用户问题：{content}
+                         {content}
+                         这是用户问题：{query}
                          如果文档包含与用户问题相关的关键词或语义意义，将其评为相关。
                          给出二进制分数 'yes' 或 'no' 来表示文档是否与问题相关。
                 """;
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemPrompt);
-        Message message = systemPromptTemplate.createMessage(Map.of("context", generateQueryContent, "query", query));
+        Message message = systemPromptTemplate.createMessage(Map.of("content", generateQueryContent, "query", query));
 
         logger.info("node :"+NAME+" 发起请求:"+query );
 
         ChatClient.CallResponseSpec callResponseSpec = chatClient.prompt(message.getText())
                 .call();
-        String id = callResponseSpec.chatResponse().getMetadata().getId();
-        String content = callResponseSpec.content();
+        ChatResponse response = callResponseSpec.chatResponse();
+        Generation result = response.getResult();
+        String id = result.getMetadata().getOrDefault("requestId", "");
+        String content = result.getOutput().getText();
 
         logger.info("node :"+NAME+" id: "+id+" 返回值: "+content);
 
