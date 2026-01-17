@@ -21,18 +21,16 @@ import org.springframework.ai.document.Document;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Title Rag service.<br>
  * Description Rag service.<br>
  *
  * @author yuanci.ytb
- * @since 1.0.0-M2
  */
 
 public interface RagService {
 
-	String graphCall(String message);
-
-	Flux<ChatResponse> retrieve(String message);
+	Map<String,Object> graphCall(String message);
 }

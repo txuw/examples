@@ -29,7 +29,6 @@ import static com.alibaba.cloud.ai.graph.action.AsyncNodeAction.node_async;
  */
 
 @Configuration
-@EnableConfigurationProperties({ RagGraphConfiguration.class })
 public class RagGraphConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(RagGraphConfiguration.class);
@@ -46,26 +45,35 @@ public class RagGraphConfiguration {
         KeyStrategyFactory keyStrategyFactory = new KeyStrategyFactoryBuilder()
                 .addPatternStrategy("query", new ReplaceStrategy())
                 .addPatternStrategy("content", new ReplaceStrategy())
+                .addPatternStrategy("answer", new ReplaceStrategy())
                 .build();
 
+        // Node
+        GenerateQueryNode generateQueryNode = new GenerateQueryNode(chatClientBuilder, knowledgeTool);
+        GradeDocumentsNode gradeDocumentsNode = new GradeDocumentsNode(chatClientBuilder);
+        RewriteNode rewriteNode = new RewriteNode(chatClientBuilder);
+        GenerateAnswerNode generateAnswerNode = new GenerateAnswerNode(chatClientBuilder);
+
         StateGraph stateGraph = new StateGraph(keyStrategyFactory)
-                .addNode("GenerateQueryNode", node_async(new GenerateQueryNode(chatClientBuilder, knowledgeTool)))
-                .addNode("GradeDocumentsNode",node_async(new GradeDocumentsNode(chatClientBuilder)))
-                .addNode("RewriteNode",node_async(new RewriteNode(chatClientBuilder)))
-                .addNode("GenerateAnswerNode",node_async(new GenerateAnswerNode(chatClientBuilder)))
-                .addEdge(StateGraph.START, "GenerateQueryNode")
-                .addEdge("GenerateQueryNode","GradeDocumentsNode")
-                .addConditionalEdges("GradeDocumentsNode",
+                // Node
+                .addNode(GenerateQueryNode.NAME, node_async(generateQueryNode))
+                .addNode(GradeDocumentsNode.NAME,node_async(gradeDocumentsNode))
+                .addNode(RewriteNode.NAME,node_async(rewriteNode))
+                .addNode(GenerateAnswerNode.NAME,node_async(generateAnswerNode))
+                // Edge
+                .addEdge(StateGraph.START, GenerateQueryNode.NAME)
+                .addEdge(GenerateQueryNode.NAME,GradeDocumentsNode.NAME)
+                .addConditionalEdges(GradeDocumentsNode.NAME,
                     edge_async(state -> {
-                        return (String) state.value("next_node").orElse(StateGraph.END);
+                        return (String) state.value("next_node").orElse(GenerateQueryNode.NAME);
                     }),
                     Map.of(
-                            "query", "query",
-                            "content", "content"
+                            GenerateAnswerNode.NAME, GenerateAnswerNode.NAME,
+                            RewriteNode.NAME, RewriteNode.NAME
                     )
                 )
-                .addEdge("GenerateAnswerNode",StateGraph.END)
-                .addEdge("RewriteNode","GenerateQueryNode");
+                .addEdge(GenerateAnswerNode.NAME,StateGraph.END)
+                .addEdge(RewriteNode.NAME,GenerateQueryNode.NAME);
 
         return stateGraph;
     }

@@ -1,9 +1,4 @@
 # 加载文件
 
-GET http://127.0.0.1:8080/ai/knowledge/importDocument
-
-###
-
-# 搜索校验
-GET http://127.0.0.1:8080/ai/knowledge/searchDocument?message=如何防止无限循环
+GET http://127.0.0.1:8080/ai/rag/graph/call?message=spring ai alibaba的环境要求
 

@@ -9,11 +9,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
  */
 public class KnowledgeRequest {
 
-    @JsonPropertyDescription("需要查询天气的城市名称，例如：'北京'。请确保传入的是具体的城市名。")
+    @JsonPropertyDescription("用户的搜索文本")
     @JsonProperty(required = true)
     String query;
 
     public String getQuery() {
         return query;
+    }
+
+    @Override
+    public String toString() {
+        return "KnowledgeRequest{" +
+                "query='" + query + '\'' +
+                '}';
     }
 }

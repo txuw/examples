@@ -2,6 +2,7 @@ package com.alibaba.cloud.ai.example.langgraph.custom.rag.tool;
 
 import com.alibaba.cloud.ai.example.langgraph.custom.rag.service.CloudRagService;
 import com.alibaba.cloud.ai.example.langgraph.custom.rag.tool.request.KnowledgeRequest;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class KnowledgeTool implements BiFunction<KnowledgeRequest, ToolContext, 
                 .builder(embeddingModel).build();
     }
 
-    @PreDestroy
+    @PostConstruct
     void init(){
         // 1. parse document
         for (String url : urls) {
@@ -63,12 +64,17 @@ public class KnowledgeTool implements BiFunction<KnowledgeRequest, ToolContext, 
 
     @Override
     public String apply(KnowledgeRequest knowledgeRequest, ToolContext toolContext) {
+        logger.info("=================================  KnowledgeTool 开始 =================================");
+        logger.info("KnowledgeTool 请求体: "+knowledgeRequest.toString());
         String query = knowledgeRequest.getQuery();
         List<Document> documents = simpleVectorStore.similaritySearch(query);
         StringBuilder output = new StringBuilder();
         for (Document document : documents) {
             output.append(document.getFormattedContent()).append("\n");
         }
+
+        logger.info("KnowledgeTool 返回值: "+output);
+        logger.info("=================================  KnowledgeTool 结束 =================================");
         return output.toString();
     }
 }

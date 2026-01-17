@@ -26,13 +26,13 @@ import com.alibaba.cloud.ai.example.langgraph.custom.rag.service.RagService;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Title Cloud rag controller.<br>
  * Description Cloud rag controller.<br>
  *
  * @author yuanci.ytb
- * @since 1.0.0-M2
  */
 
 @RestController
@@ -45,10 +45,10 @@ public class CloudRagController {
 		this.cloudRagService = cloudRagService;
 	}
 
-	@GetMapping("/bailian/knowledge/generate")
-	public Flux<String> generate(@RequestParam(value = "message",
-			defaultValue = "你好，请问你的知识库文档主要是关于什么内容的?") String message) {
-		return cloudRagService.retrieve(message).map(x -> x.getResult().getOutput().getText());
+	@GetMapping("/rag/graph/call")
+	public Map<String,Object> generate(@RequestParam(value = "message",
+			defaultValue = "spring ai alibaba的环境要求") String message) {
+		return cloudRagService.graphCall(message);
 	}
 
 }

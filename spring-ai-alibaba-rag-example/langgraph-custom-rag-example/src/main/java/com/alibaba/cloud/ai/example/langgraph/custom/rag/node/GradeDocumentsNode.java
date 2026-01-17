@@ -7,8 +7,12 @@ import com.alibaba.cloud.ai.graph.action.NodeAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +29,8 @@ public class GradeDocumentsNode implements NodeAction {
 
     private final ChatClient chatClient;
 
+    public final static String NAME = "GradeDocumentsNode";
+
     public GradeDocumentsNode(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder
                 .build();
@@ -34,10 +40,34 @@ public class GradeDocumentsNode implements NodeAction {
     public Map<String, Object> apply(OverAllState state) throws Exception {
 
         String query = state.value("query", "");
-        String content = chatClient.prompt(query).call().content();
+        String generateQueryContent = state.value("content", "");
+        String systemPrompt = """
+                        你是一个评分员，负责评估检索到的文档与用户问题的相关性。
+                         这是检索到的文档：
+                         {query}
+                         这是用户问题：{content}
+                         如果文档包含与用户问题相关的关键词或语义意义，将其评为相关。
+                         给出二进制分数 'yes' 或 'no' 来表示文档是否与问题相关。
+                """;
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemPrompt);
+        Message message = systemPromptTemplate.createMessage(Map.of("context", generateQueryContent, "query", query));
+
+        logger.info("node :"+NAME+" 发起请求:"+query );
+
+        ChatClient.CallResponseSpec callResponseSpec = chatClient.prompt(message.getText())
+                .call();
+        String id = callResponseSpec.chatResponse().getMetadata().getId();
+        String content = callResponseSpec.content();
+
+        logger.info("node :"+NAME+" id: "+id+" 返回值: "+content);
 
         HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put("generate_query_content", content);
+        if(content!=null && content.contains("yes")){
+            resultMap.put("next_node", GenerateAnswerNode.NAME);
+        }
+        if(content!=null && content.contains("no")){
+            resultMap.put("next_node", RewriteNode.NAME );
+        }
 
         return resultMap;
     }
