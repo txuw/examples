@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: spring-ai-alibaba-evaluation-example
+    name: spring-ai-alibaba-llm-auditor
 
   ai:
     dashscope:

@@ -26,8 +26,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 2025/10/13
  */
 @SpringBootApplication
-public class EvaluationExampleApplication {
+public class LLMAuditorApplication {
     public static void main(String[] args) {
-        SpringApplication.run(EvaluationExampleApplication.class, args);
+        SpringApplication.run(LLMAuditorApplication.class, args);
     }
 }
