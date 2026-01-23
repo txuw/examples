@@ -1,11 +1,11 @@
 /*
- * Copyright 2024-2025 the original author or authors.
+ * Copyright 2026-2027 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,44 +14,29 @@
  * limitations under the License.
  */
 
-package com.alibaba.cloud.ai.example.evaluation.controller;
+package com.alibaba.cloud.ai.example.llm.auditor.controller;
 
-import com.alibaba.cloud.ai.example.evaluation.hook.CriticAgentHook;
-import com.alibaba.cloud.ai.example.evaluation.hook.ReviserAgentHook;
-import com.alibaba.cloud.ai.example.evaluation.tool.WebSearchTool;
+import com.alibaba.cloud.ai.example.llm.auditor.hook.CriticAgentHook;
+import com.alibaba.cloud.ai.example.llm.auditor.hook.ReviserAgentHook;
+import com.alibaba.cloud.ai.example.llm.auditor.tool.WebSearchTool;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
 import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
-import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
- * AI模型评估示例 Controller
- *
- * @author xuguan
- * @since 2025/10/13
+ * @author : zhengyuchao
+ * @date : 2026/1/22
  */
 @RestController
 @RequestMapping("/ai")

@@ -1,4 +1,20 @@
-package com.alibaba.cloud.ai.example.evaluation.tool;
+/*
+ * Copyright 2026-2027 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.alibaba.cloud.ai.example.llm.auditor.tool;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.function.FunctionToolCallback;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,8 +34,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
- * Tavily 联网搜索工具
- * 专为 AI Agent 设计，返回清洗后的文本内容
+ * @author : zhengyuchao
+ * @date : 2026/1/22
  */
 public class WebSearchTool implements BiFunction<WebSearchTool.Request, ToolContext, String> {
 
