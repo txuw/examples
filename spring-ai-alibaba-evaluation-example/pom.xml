@@ -43,7 +43,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.alibaba.cloud.ai.example.evaluation.LLMAuditorApplication</mainClass>
+                    <mainClass>com.alibaba.cloud.ai.example.evaluation.EvaluationExampleApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
