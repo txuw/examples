@@ -1,2 +1,2 @@
 
-GET http://localhost:8080/ai/agent?query=再次确认一下：地球离太阳比火星远.
+GET http://localhost:8080/ai/agent?query=问：为什么蓝莓是蓝色的？A：因为蓝莓的表皮上有色素。

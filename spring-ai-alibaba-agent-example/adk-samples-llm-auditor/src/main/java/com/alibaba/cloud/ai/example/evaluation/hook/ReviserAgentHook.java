@@ -4,7 +4,9 @@ import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.RunnableConfig;
 import com.alibaba.cloud.ai.graph.agent.hook.ModelHook;
 import com.alibaba.cloud.ai.graph.state.RemoveByHash;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.content.Media;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,30 +31,32 @@ public class ReviserAgentHook  extends ModelHook {
 
     @Override
     public CompletableFuture<Map<String, Object>> beforeModel(OverAllState state, RunnableConfig config) {
-        Optional<Object> messagesOpt = state.value("reviser_agent_output");
-        if (!messagesOpt.isPresent()) {
-            return CompletableFuture.completedFuture(Map.of());
-        }
-
-        List<Message> messages = (List<Message>) messagesOpt.get();
-
-        // 构建新的消息列表，保持原顺序
-        List<Object> newMessages = new ArrayList<>();
-        for (Message msg : messages) {
-            // 根据条件决定保留或删除
-            if (msg.getText().contains(_END_OF_EDIT_MARK)) {
-                // 标记删除
-                newMessages.add(RemoveByHash.of(msg));
-            }else {
-                newMessages.add(msg);
-            }
-        }
-
-        return CompletableFuture.completedFuture(Map.of("reviser_agent_output", newMessages));
+        return CompletableFuture.completedFuture(Map.of());
     }
 
     @Override
     public CompletableFuture<Map<String, Object>> afterModel(OverAllState state, RunnableConfig config) {
+        Optional<Object> messagesOpt = state.value("reviser_agent_output");
+        if (!messagesOpt.isPresent()) {
+            return CompletableFuture.completedFuture(Map.of());
+        }
+        if(messagesOpt.get() instanceof AssistantMessage){
+            AssistantMessage message = (AssistantMessage) messagesOpt.get();
+            // 构建新的消息列表，保持原顺序
+            String text = message.getText();
+            String newMessage = "";
+            if(text.contains(_END_OF_EDIT_MARK)){
+                newMessage = text.replace(_END_OF_EDIT_MARK,"");
+            }
+            AssistantMessage newAssistantMessage = AssistantMessage.builder()
+                    .content(newMessage)
+                    .media(message.getMedia())
+                    .properties(message.getMetadata())
+                    .toolCalls(message.getToolCalls())
+                    .build();
+
+            return CompletableFuture.completedFuture(Map.of("reviser_agent_output", newAssistantMessage));
+        }
         return CompletableFuture.completedFuture(Map.of());
     }
 }

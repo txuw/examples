@@ -16,6 +16,9 @@
 
 package com.alibaba.cloud.ai.example.evaluation.controller;
 
+import com.alibaba.cloud.ai.example.evaluation.hook.CriticAgentHook;
+import com.alibaba.cloud.ai.example.evaluation.hook.ReviserAgentHook;
+import com.alibaba.cloud.ai.example.evaluation.tool.WebSearchTool;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.flow.agent.SequentialAgent;
@@ -36,6 +39,7 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +62,10 @@ public class LLMAuditorController {
     public LLMAuditorController(ChatModel chatModel) {
         this.chatModel = chatModel;
     }
+
+    // 你的 Tavily API Key (建议放在配置文件 application.properties 中，通过 @Value 注入)
+    @Value("${search.tavily.api-key}")
+    private String tavilyApiKey;
 
     @PostConstruct
     public void init() {
@@ -136,7 +144,7 @@ public class LLMAuditorController {
             太阳是球形的，非常热。
             ---END-OF-EDIT---
             
-            以下是问答对和审稿人提供的调查结果：
+            所有Message中含有问答对和审稿人提供的调查结果：
             """;
 
     private static final String criticAgentPrompt= """
@@ -186,7 +194,7 @@ public class LLMAuditorController {
             
             输出的最后一个块应该是一个markdown格式的列表，总结了验证结果。对于您验证的每个CLAIM，您应该输出该CLAIM（作为一个独立的语句）、答案文本中相应的部分、判决和证明。
             
-            以下是你需要反复检查的问题和答案：
+            user信息为你需要反复检查的问题：
             """;
 
     @GetMapping("/agent")
@@ -196,8 +204,8 @@ public class LLMAuditorController {
                 .description("")
                 .model(chatModel)
                 .instruction(criticAgentPrompt)
-                .tools()
-                .interceptors()
+                .tools(WebSearchTool.getFunctionToolCallback(tavilyApiKey))
+                .hooks(new CriticAgentHook())
                 .outputKey("critic_agent_output")
                 .build();
 
@@ -206,7 +214,7 @@ public class LLMAuditorController {
                 .description("")
                 .model(chatModel)
                 .instruction(reviserPrompt)
-                .interceptors()
+                .hooks(new ReviserAgentHook())
                 .outputKey("reviser_agent_output")
                 .build();
 

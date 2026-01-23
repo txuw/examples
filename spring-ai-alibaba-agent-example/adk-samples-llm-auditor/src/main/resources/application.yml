@@ -15,6 +15,10 @@ spring:
         options:
           model: text-embedding-v3
 
+search:
+  tavily:
+    api-key: ${WEB_SEARCH_KEY}
+
 logging:
   level:
     org.springframework.ai.chat.client.advisor: debug
