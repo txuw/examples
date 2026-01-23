@@ -3,7 +3,7 @@
 ## 简介
 
 此示例演示了如何使用 Spring AI Alibaba 构建一个 LLM 答案审核系统。该系统通过两个 Agent 的协作，对 AI 生成的答案进行事实核查和修订，确保答案的准确性和可靠性。
-
+参考自 google adk样例   https://github.com/google/adk-samples/tree/main/python/agents/llm-auditor
 ### 核心功能
 
 - **Critic Agent（审稿 Agent）**：使用联网搜索工具验证答案中的事实声明，识别不准确、有争议或不支持的主张
